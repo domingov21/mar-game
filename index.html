@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mario Level 1-1</title>
+    <style>
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background: #5C94FC;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            overflow-x: auto;
+            font-family: 'Courier New', Courier, monospace;
+        }
+
+        .scene {
+            height: 500px;
+            width: 3000px;
+            position: relative;
+        }
+
+        .ground {
+            height: 100px;
+            background: #C84C0C;
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            border-top: 20px solid #00A800;
+        }
+
+        .mario {
+            width: 50px;
+            height: 60px;
+            position: absolute;
+            bottom: 100px;
+            left: 50px;
+            z-index: 10;
+            transition: transform 0.1s;
+        }
+
+        /* Mario's body parts */
+        .mario-body {
+            width: 30px;
+            height: 30px;
+            background: #FF0000;
+            position: absolute;
+            bottom: 0;
+            left: 10px;
+        }
+
+        .mario-head {
+            width: 25px;
+            height: 25px;
+            background: #FFA07A;
+            position: absolute;
+            bottom: 30px;
+            left: 12px;
+            border-radius: 50% 50% 0 0;
+        }
+
+        .mario-hat {
+            width: 30px;
+            height: 10px;
+            background: #FF0000;
+            position: absolute;
+            bottom: 50px;
+            left: 10px;
+            border-radius: 5px 5px 0 0;
+        }
+
+        .mario.jump {
+            animation: jump 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        @keyframes jump {
+            0%, 100% { bottom: 100px; }
+            50% { bottom: 250px; }
+        }
+
+        .coin {
+            width: 20px;
+            height: 20px;
+            background: #FFD700;
+            position: absolute;
+            border-radius: 50%;
+            animation: spin 1s infinite linear;
+        }
+
+        @keyframes spin {
+            0% { transform: rotateY(0deg); }
+            100% { transform: rotateY(360deg); }
+        }
+
+        .goomba {
+            width: 40px;
+            height: 40px;
+            background: #8B4513;
+            position: absolute;
+            bottom: 100px;
+            border-radius: 20px 20px 0 0;
+            animation: walkGoomba 2s infinite linear;
+        }
+
+        @keyframes walkGoomba {
+            0% { transform: translateX(0); }
+            50% { transform: translateX(100px); }
+            100% { transform: translateX(0); }
+        }
+
+        .block {
+            width: 50px;
+            height: 50px;
+            background: #E89A3E;
+            position: absolute;
+            border: 5px solid #6B4C0F;
+            box-sizing: border-box;
+        }
+
+        .pipe {
+            width: 80px;
+            height: 80px;
+            background: #00A800;
+            position: absolute;
+            bottom: 100px;
+            border: 5px solid #006800;
+            box-sizing: border-box;
+        }
+
+        .pipe::before {
+            content: '';
+            position: absolute;
+            top: -20px;
+            width: 100px;
+            height: 20px;
+            background: #00A800;
+            left: -10px;
+            border: 5px solid #006800;
+            box-sizing: border-box;
+        }
+
+        .cloud {
+            position: absolute;
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+        }
+
+        .bush {
+            position: absolute;
+            bottom: 120px;
+            width: 60px;
+            height: 40px;
+            background: #00A800;
+            border-radius: 30px 30px 0 0;
+        }
+
+        .score {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            color: white;
+            font-size: 24px;
+            z-index: 100;
+        }
+
+        .score-display {
+            position: fixed;
+            top: 60px;
+            left: 20px;
+            color: white;
+            font-size: 24px;
+            z-index: 100;
+        }
+    </style>
+</head>
+<body>
+    <div class="score">MARIO    WORLD 1-1    TIME<br>000000    ★×00    400</div>
+    <div class="score-display">COINS: <span id="coinCount">0</span></div>
+    <div class="scene">
+        <!-- Mario with detailed parts -->
+        <div class="mario">
+            <div class="mario-hat"></div>
+            <div class="mario-head"></div>
+            <div class="mario-body"></div>
+        </div>
+
+        <!-- Coins -->
+        <div class="coin" style="bottom: 200px; left: 300px;"></div>
+        <div class="coin" style="bottom: 200px; left: 500px;"></div>
+        <div class="coin" style="bottom: 300px; left: 700px;"></div>
+
+        <!-- Enemies -->
+        <div class="goomba" style="left: 400px;"></div>
+        <div class="goomba" style="left: 800px;"></div>
+
+        <!-- Clouds -->
+        <div class="cloud" style="top: 100px; left: 300px;"></div>
+        <div class="cloud" style="top: 150px; left: 600px;"></div>
+        <div class="cloud" style="top: 80px; left: 900px;"></div>
+
+        <!-- Bushes -->
+        <div class="bush" style="left: 200px;"></div>
+        <div class="bush" style="left: 500px;"></div>
+        <div class="bush" style="left: 800px;"></div>
+
+        <!-- Question Blocks -->
+        <div class="block" style="bottom: 250px; left: 400px;"></div>
+        <div class="block" style="bottom: 250px; left: 500px;"></div>
+        <div class="block" style="bottom: 250px; left: 600px;"></div>
+
+        <!-- Pipes -->
+        <div class="pipe" style="left: 700px;"></div>
+        <div class="pipe" style="left: 1000px; height: 120px;"></div>
+        <div class="pipe" style="left: 1400px; height: 160px;"></div>
+
+        <!-- Ground -->
+        <div class="ground"></div>
+    </div>
+
+    <script>
+        const mario = document.querySelector('.mario');
+        const coins = document.querySelectorAll('.coin');
+        const goombas = document.querySelectorAll('.goomba');
+        let position = 50;
+        let verticalVelocity = 0;
+        let isJumping = false;
+        let coinCount = 0;
+        let isGameOver = false;
+
+        // Physics constants
+        const GRAVITY = 0.8;
+        const JUMP_FORCE = -15;
+        const MOVE_SPEED = 5;
+
+        function updatePhysics() {
+            if (isJumping) {
+                verticalVelocity += GRAVITY;
+                let newY = parseInt(getComputedStyle(mario).bottom) - verticalVelocity;
+                
+                if (newY <= 100) {
+                    newY = 100;
+                    isJumping = false;
+                    verticalVelocity = 0;
+                }
+                
+                mario.style.bottom = newY + 'px';
+            }
+        }
+
+        function checkCollisions() {
+            const marioRect = mario.getBoundingClientRect();
+            
+            // Coin collection
+            coins.forEach(coin => {
+                const coinRect = coin.getBoundingClientRect();
+                if (isColliding(marioRect, coinRect) && coin.style.visibility !== 'hidden') {
+                    coin.style.visibility = 'hidden';
+                    coinCount++;
+                    document.getElementById('coinCount').textContent = coinCount;
+                }
+            });
+
+            // Enemy collision
+            goombas.forEach(goomba => {
+                const goombaRect = goomba.getBoundingClientRect();
+                if (isColliding(marioRect, goombaRect) && !isGameOver) {
+                    gameOver();
+                }
+            });
+        }
+
+        function isColliding(rect1, rect2) {
+            return !(rect1.right < rect2.left || 
+                    rect1.left > rect2.right || 
+                    rect1.bottom < rect2.top || 
+                    rect1.top > rect2.bottom);
+        }
+
+        function gameOver() {
+            isGameOver = true;
+            alert('Game Over! Coins collected: ' + coinCount);
+            location.reload();
+        }
+
+        // Movement controls
+        document.addEventListener('keydown', (e) => {
+            if (isGameOver) return;
+
+            switch(e.key) {
+                case 'ArrowRight':
+                    position += MOVE_SPEED;
+                    mario.style.left = position + 'px';
+                    mario.style.transform = 'scaleX(1)';
+                    break;
+                case 'ArrowLeft':
+                    position -= MOVE_SPEED;
+                    mario.style.left = position + 'px';
+                    mario.style.transform = 'scaleX(-1)';
+                    break;
+                case 'ArrowUp':
+                case ' ':
+                    if (!isJumping) {
+                        isJumping = true;
+                        verticalVelocity = JUMP_FORCE;
+                    }
+                    break;
+            }
+        });
+
+        // Game loop
+        function gameLoop() {
+            if (!isGameOver) {
+                updatePhysics();
+                checkCollisions();
+                requestAnimationFrame(gameLoop);
+            }
+        }
+
+        gameLoop();
+    </script>
+</body>
+</html>
