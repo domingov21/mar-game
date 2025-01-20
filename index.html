@@ -174,6 +174,29 @@
             font-size: 24px;
             z-index: 100;
         }
+
+        .block.question {
+            background: #E8B23E;
+            animation: blink 1s infinite;
+        }
+
+        .block.hit {
+            background: #A0522D;
+        }
+
+        @keyframes blink {
+            0%, 100% { background: #E8B23E; }
+            50% { background: #FFD700; }
+        }
+
+        .mario.invincible {
+            animation: invincible 0.5s infinite;
+        }
+
+        @keyframes invincible {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
     </style>
 </head>
 <body>
@@ -208,7 +231,7 @@
 
         <!-- Question Blocks -->
         <div class="block" style="bottom: 250px; left: 400px;"></div>
-        <div class="block" style="bottom: 250px; left: 500px;"></div>
+        <div class="block question" style="bottom: 250px; left: 500px;"></div>
         <div class="block" style="bottom: 250px; left: 600px;"></div>
 
         <!-- Pipes -->
@@ -231,19 +254,46 @@
         let isGameOver = false;
         let isMovingLeft = false;
         let isMovingRight = false;
+        let isInvincible = false;
 
         // Physics constants
         const GRAVITY = 0.8;
         const JUMP_FORCE = -15;
-        const MOVE_SPEED = 5;
-        const ACCELERATION = 0.5;
+        const MOVE_SPEED = 3;
+        const ACCELERATION = 0.3;
         let currentSpeed = 0;
-        const MAX_SPEED = 8;
+        const MAX_SPEED = 5;
 
         function updatePhysics() {
             if (isJumping) {
                 verticalVelocity += GRAVITY;
                 let newY = parseInt(getComputedStyle(mario).bottom) - verticalVelocity;
+                
+                // Check for platform collisions
+                const platforms = [...document.querySelectorAll('.pipe'), ...document.querySelectorAll('.block')];
+                const marioRect = mario.getBoundingClientRect();
+                
+                for (const platform of platforms) {
+                    const platformRect = platform.getBoundingClientRect();
+                    
+                    // Check if Mario is above the platform
+                    if (marioRect.bottom <= platformRect.top && 
+                        marioRect.right > platformRect.left && 
+                        marioRect.left < platformRect.right &&
+                        marioRect.bottom + verticalVelocity >= platformRect.top) {
+                        
+                        newY = platformRect.top - marioRect.height + window.scrollY;
+                        isJumping = false;
+                        verticalVelocity = 0;
+
+                        // Check for question block hit
+                        if (platform.classList.contains('question') && !platform.classList.contains('hit')) {
+                            activatePowerUp(platform);
+                        }
+                        
+                        break;
+                    }
+                }
                 
                 if (newY <= 100) {
                     newY = 100;
@@ -274,6 +324,23 @@
             }
         }
 
+        function activatePowerUp(block) {
+            block.classList.remove('question');
+            block.classList.add('hit');
+            
+            // Activate invincibility
+            if (!isInvincible) {
+                isInvincible = true;
+                mario.classList.add('invincible');
+                
+                // Invincibility timer (10 seconds)
+                setTimeout(() => {
+                    isInvincible = false;
+                    mario.classList.remove('invincible');
+                }, 10000);
+            }
+        }
+
         function checkCollisions() {
             const marioRect = mario.getBoundingClientRect();
             
@@ -288,12 +355,14 @@
             });
 
             // Enemy collision
-            goombas.forEach(goomba => {
-                const goombaRect = goomba.getBoundingClientRect();
-                if (isColliding(marioRect, goombaRect) && !isGameOver) {
-                    gameOver();
-                }
-            });
+            if (!isInvincible) {
+                goombas.forEach(goomba => {
+                    const goombaRect = goomba.getBoundingClientRect();
+                    if (isColliding(marioRect, goombaRect) && !isGameOver) {
+                        gameOver();
+                    }
+                });
+            }
         }
 
         function isColliding(rect1, rect2) {
