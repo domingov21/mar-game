@@ -229,11 +229,16 @@
         let isJumping = false;
         let coinCount = 0;
         let isGameOver = false;
+        let isMovingLeft = false;
+        let isMovingRight = false;
 
         // Physics constants
         const GRAVITY = 0.8;
         const JUMP_FORCE = -15;
         const MOVE_SPEED = 5;
+        const ACCELERATION = 0.5;
+        let currentSpeed = 0;
+        const MAX_SPEED = 8;
 
         function updatePhysics() {
             if (isJumping) {
@@ -247,6 +252,25 @@
                 }
                 
                 mario.style.bottom = newY + 'px';
+            }
+
+            // Smooth movement
+            if (isMovingRight) {
+                currentSpeed = Math.min(currentSpeed + ACCELERATION, MAX_SPEED);
+            } else if (isMovingLeft) {
+                currentSpeed = Math.max(currentSpeed - ACCELERATION, -MAX_SPEED);
+            } else {
+                currentSpeed = currentSpeed > 0 ? Math.max(0, currentSpeed - ACCELERATION) : 
+                             Math.min(0, currentSpeed + ACCELERATION);
+            }
+
+            position += currentSpeed;
+            mario.style.left = position + 'px';
+            
+            if (currentSpeed > 0) {
+                mario.style.transform = 'scaleX(1)';
+            } else if (currentSpeed < 0) {
+                mario.style.transform = 'scaleX(-1)';
             }
         }
 
@@ -289,23 +313,35 @@
         document.addEventListener('keydown', (e) => {
             if (isGameOver) return;
 
-            switch(e.key) {
-                case 'ArrowRight':
-                    position += MOVE_SPEED;
-                    mario.style.left = position + 'px';
-                    mario.style.transform = 'scaleX(1)';
+            switch(e.key.toLowerCase()) {
+                case 'arrowright':
+                case 'd':
+                    isMovingRight = true;
                     break;
-                case 'ArrowLeft':
-                    position -= MOVE_SPEED;
-                    mario.style.left = position + 'px';
-                    mario.style.transform = 'scaleX(-1)';
+                case 'arrowleft':
+                case 'a':
+                    isMovingLeft = true;
                     break;
-                case 'ArrowUp':
+                case 'arrowup':
+                case 'w':
                 case ' ':
                     if (!isJumping) {
                         isJumping = true;
                         verticalVelocity = JUMP_FORCE;
                     }
+                    break;
+            }
+        });
+
+        document.addEventListener('keyup', (e) => {
+            switch(e.key.toLowerCase()) {
+                case 'arrowright':
+                case 'd':
+                    isMovingRight = false;
+                    break;
+                case 'arrowleft':
+                case 'a':
+                    isMovingLeft = false;
                     break;
             }
         });
